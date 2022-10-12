@@ -43,6 +43,8 @@ namespace ILDebugging.Decoder
 
         public string EscapedString(string str)
         {
+            if (str == null) return "";
+
             var length = str.Length;
             var sb = new StringBuilder(length*2);
 

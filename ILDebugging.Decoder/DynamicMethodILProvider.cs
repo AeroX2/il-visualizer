@@ -6,6 +6,7 @@ namespace ILDebugging.Decoder
 {
     public class DynamicMethodILProvider : IILProvider
     {
+        static FieldInfo s_code = typeof(DynamicILInfo).GetField("m_code", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo s_fiLen = typeof(ILGenerator).GetField("m_length", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo s_fiStream = typeof(ILGenerator).GetField("m_ILStream", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MethodInfo s_miBakeByteArray = typeof(ILGenerator).GetMethod("BakeByteArray", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -22,7 +23,8 @@ namespace ILDebugging.Decoder
         {
             if (m_byteArray == null)
             {
-                var ilgen = m_method.GetILGenerator();
+                m_byteArray = (byte[])s_code.GetValue(m_method.GetDynamicILInfo());
+                /*var ilgen = m_method.GetILGenerator();
                 try
                 {
                     m_byteArray = (byte[])s_miBakeByteArray.Invoke(ilgen, null) ?? new byte[0];
@@ -32,7 +34,7 @@ namespace ILDebugging.Decoder
                     var length = (int)s_fiLen.GetValue(ilgen);
                     m_byteArray = new byte[length];
                     Array.Copy((byte[])s_fiStream.GetValue(ilgen), m_byteArray, length);
-                }
+                }*/
             }
             return m_byteArray;
         }

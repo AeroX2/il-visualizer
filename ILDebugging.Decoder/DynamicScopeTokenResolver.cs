@@ -22,6 +22,8 @@ namespace ILDebugging.Decoder
         private static readonly Type s_genFieldInfoType;
         private static readonly FieldInfo s_genfieldFi1;
         private static readonly FieldInfo s_genfieldFi2;
+                private static FieldInfo s_scopeFi2;
+        private static FieldInfo s_codeFi2;
 
         static DynamicScopeTokenResolver()
         {
@@ -29,6 +31,8 @@ namespace ILDebugging.Decoder
 
             s_indexer = Type.GetType("System.Reflection.Emit.DynamicScope").GetProperty("Item", flags);
             s_scopeFi = Type.GetType("System.Reflection.Emit.DynamicILGenerator").GetField("m_scope", flags);
+            s_scopeFi2 = Type.GetType("System.Reflection.Emit.DynamicILInfo").GetField("m_scope", flags);
+            s_codeFi2 = Type.GetType("System.Reflection.Emit.DynamicILInfo").GetField("m_code", flags);
 
             s_varArgMethodType = Type.GetType("System.Reflection.Emit.VarArgMethod");
             s_varargFi1 = s_varArgMethodType.GetField("m_method", flags);
@@ -51,7 +55,16 @@ namespace ILDebugging.Decoder
 
         public DynamicScopeTokenResolver(DynamicMethod dm)
         {
-            m_scope = s_scopeFi.GetValue(dm.GetILGenerator());
+            bool gdili = false;
+                        if (dm.GetDynamicILInfo() != null)
+                            {
+                                if (((byte[])s_codeFi2.GetValue(dm.GetDynamicILInfo())).Length != 0)
+                    gdili = true;
+                            }
+                        if (gdili)
+                m_scope = s_scopeFi2.GetValue(dm.GetDynamicILInfo());
+                        else
+                m_scope = s_scopeFi.GetValue(dm.GetILGenerator());
         }
 
         public string AsString(int token)
@@ -88,6 +101,8 @@ namespace ILDebugging.Decoder
 
             if (this[token] is RuntimeMethodHandle)
                 return MethodBase.GetMethodFromHandle((RuntimeMethodHandle)this[token]);
+
+            if (this[token] == null) return null;
 
             if (this[token].GetType() == s_genMethodInfoType)
                 return MethodBase.GetMethodFromHandle(
