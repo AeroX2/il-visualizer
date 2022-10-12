@@ -8,14 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using ILDebugging.Visualizer;
-using Microsoft.VisualStudio.DebuggerVisualizers;
 
-[assembly: DebuggerVisualizer(
-               typeof(MethodBodyNoVisualizer),
-               typeof(MethodBodyObjectSource),
-               Target = typeof(MethodBase),
-               Description = "Send to IL Monitor")
-]
 
 namespace ILDebugging.Visualizer
 {
@@ -50,26 +43,5 @@ namespace ILDebugging.Visualizer
         }
     }
 
-    public class MethodBodyNoVisualizer : DialogDebuggerVisualizer
-    {
-        protected override void Show(IDialogVisualizerService windowService, IVisualizerObjectProvider objectProvider)
-        {
-            try
-            {
-                MethodBodyInfo mbi;
-                using (var output = objectProvider.GetData())
-                    mbi = (MethodBodyInfo)new BinaryFormatter().Deserialize(output, null);
-
-                IXmlDataProvider<MethodBodyInfo> provider = new TcpClientDataProvider(port: 22017);
-                provider.Dump(mbi);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message,
-                    "Send to IL Monitor",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-        }
-    }
+    
 }

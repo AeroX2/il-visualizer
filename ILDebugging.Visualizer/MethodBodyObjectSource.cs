@@ -2,13 +2,12 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.VisualStudio.DebuggerVisualizers;
+
 
 namespace ILDebugging.Visualizer
 {
-    public class MethodBodyObjectSource : VisualizerObjectSource
-    {
-        public override void GetData(object target, Stream outgoingData)
+    public class MethodBodyObjectSource { 
+        public void GetData(object target, Stream outgoingData)
         {
             if (target is MethodBase method)
             {
